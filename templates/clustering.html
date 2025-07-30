@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #2e59d9;
+            --accent-color: #36b9cc;
+            --light-bg: #f8f9fc;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .config-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.5rem 0 rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+        }
+
+        .config-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            border: none;
+        }
+
+        .option-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-radius: 50px;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 89, 217, 0.3);
+        }
+
+        .section-title {
+            position: relative;
+            color: #2e59d9;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.7rem;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .data-prep-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.5rem rgba(58, 59, 69, 0.1);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .data-prep-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #eef1f7;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .data-prep-title:after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .column-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.75rem;
+            padding: 15px;
+            background-color: #fafbfe;
+        }
+
+        .form-check {
+            margin-bottom: 0.75rem;
+            padding-left: 1.75rem;
+        }
+
+        .form-check-input {
+            width: 1.1em;
+            height: 1.1em;
+            margin-top: 0.2em;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .param-input {
+            width: 100px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.75rem;
+            border: 2px solid #e3e6f0;
+            border-radius: 8px;
+            color: var(--primary-color);
+        }
+
+        .param-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(54, 185, 204, 0.2);
+        }
+
+        .visualization-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.5rem rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .visualization-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .visualization-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.25rem;
+            font-weight: 600;
+        }
+
+        .visualization-body {
+            padding: 1.5rem;
+        }
+
+        .visualization-img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 0.75rem rgba(58, 59, 69, 0.08);
+            transition: all 0.3s;
+        }
+
+        .visualization-img:hover {
+            transform: scale(1.02);
+        }
+
+        .cluster-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 0.15rem 1.5rem rgba(58, 59, 69, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .cluster-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .cluster-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1.25rem;
+            font-weight: 600;
+        }
+
+        .cluster-badge {
+            font-size: 0.85rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 50px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .lead {
+            color: #5a5c69;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Header Section -->
+                <div class="text-center mb-5">
+                    <h1 class="mb-3">Clusters Configuration</h1>
+                    <p class="lead">Customize your Cluster model parameters to identify patterns in your data</p>
+                </div>
+
+                <form id="clustering" method="POST">
+                    <h2 class="section-title">Data Preparation</h2>
+
+                    <div class="data-prep-container">
+                        <!-- Column Selection -->
+                        <h3 class="data-prep-title">1. Column Selection</h3>
+                        <p class="mb-3">Select features to include in the model:</p>
+                        <div class="column-list">
+                            {% for column in columns %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="selected_columns" value="{{ column }}" id="col-{{ loop.index }}" checked>
+                                <label class="form-check-label" for="col-{{ loop.index }}">
+                                    {{ column }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Main Configuration Section -->
+                    <h2 class="section-title">Model Configuration</h2>
+
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="config-card">
+                                <div class="card-header">
+                                    <h3 class="mb-0"><i class="bi bi-sliders me-2"></i>Manual Configuration</h3>
+                                </div>
+                                <div class="card-body text-center p-4">
+                                    <div class="option-icon">
+                                        <i class="bi bi-diagram-3"></i>
+                                    </div>
+                                    <h4 class="mb-3">Set Number of Clusters</h4>
+                                    <p class="text-muted mb-4">Specify how many groups you want to identify in your data</p>
+
+                                    <div class="mb-4">
+                                        <label for="clusters" class="form-label mb-3 fw-bold">Cluster Count</label>
+                                        <input type="number" id="clusters" class="form-control param-input" name="n_clusters"
+                                               min="1" max="10" value="3" required>
+                                    </div>
+
+                                    <button type="submit" formaction="/clustering_configure" class="btn btn-primary-custom w-100 mt-2">
+                                        <i class="bi bi-gear me-2"></i>Configure & Run Model
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Visualization Section -->
+                {% if elbow_plot and silhouette_plot %}
+                <div class="mt-5">
+                    <h2 class="section-title">Cluster Analysis</h2>
+
+                    <div class="row">
+                        <!-- Elbow Method Card -->
+                        <div class="col-md-6 mb-4">
+                            <div class="visualization-card">
+                                <div class="visualization-header">
+                                    <h4 class="mb-0"><i class="bi bi-graph-down me-2"></i>Elbow Method</h4>
+                                </div>
+                                <div class="visualization-body">
+                                    <img src="{{ url_for('static', filename=elbow_plot) }}"
+                                         alt="Elbow Method Plot" class="visualization-img">
+                                    <p class="mt-3 text-muted">
+                                        Shows the optimal number of clusters where the inertia starts decreasing linearly.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Silhouette Score Card -->
+                        <div class="col-md-6 mb-4">
+                            <div class="visualization-card">
+                                <div class="visualization-header">
+                                    <h4 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Silhouette Score</h4>
+                                </div>
+                                <div class="visualization-body">
+                                    <img src="{{ url_for('static', filename=silhouette_plot) }}"
+                                         alt="Silhouette Score Plot" class="visualization-img">
+                                    <p class="mt-3 text-muted">
+                                        Measures how similar an object is to its own cluster compared to other clusters.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if results %}
+                <div class="mt-5">
+                    <h2 class="section-title">Clustering Results</h2>
+
+                    <div class="row">
+                        <!-- Correlation Matrix -->
+                        <div class="col-md-6 mb-4">
+                            <div class="cluster-card">
+                                <div class="cluster-header">
+                                    <h4 class="mb-0"><i class="bi bi-grid-3x3 me-2"></i>Correlation Matrix</h4>
+                                </div>
+                                <div class="visualization-body">
+                                    <img src="{{ url_for('static', filename=results.corr_plot) }}"
+                                         alt="Correlation Matrix" class="visualization-img">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cluster Visualization -->
+                        <div class="col-md-6 mb-4">
+                            <div class="cluster-card">
+                                <div class="cluster-header">
+                                    <h4 class="mb-0"><i class="bi bi-collection me-2"></i>Cluster Visualization</h4>
+                                </div>
+                                <div class="visualization-body">
+                                    <img src="{{ url_for('static', filename=results.cluster_plot) }}"
+                                         alt="Cluster Visualization" class="visualization-img mb-3">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <h5>Cluster Distribution</h5>
+                                            <p><strong>Number of clusters:</strong> {{ results.n_clusters }}</p>
+                                        </div>
+                                        <div class="badge bg-primary p-2">
+                                            Total Points: {{ results.cluster_counts.values() | sum }}
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        {% for cluster, count in results.cluster_counts.items() %}
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div>
+                                                <span class="cluster-badge" style="background-color: {{ ['#4e73df', '#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b'][loop.index0 % 5] }}; color: white;">
+                                                    Cluster {{ cluster }}
+                                                </span>
+                                            </div>
+                                            <div class="fw-bold">
+                                                {{ count }} points ({{ (count/results.cluster_counts.values() | sum*100)|round(1) }}%)
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-3" style="height: 8px;">
+                                            <div class="progress-bar" role="progressbar"
+                                                 style="width: {{ (count/results.cluster_counts.values() | sum*100)|round(1) }}%;
+                                                        background-color: {{ ['#4e73df', '#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b'][loop.index0 % 5] }};"
+                                                 aria-valuenow="{{ (count/results.cluster_counts.values() | sum*100)|round(1) }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Model Comparison Section -->
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <!-- Model Comparison Card -->
+                            <div class="card border-success mb-4">
+                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h2 class="h5 mb-0"><i class="fas fa-chart-line me-2"></i>Next Steps</h2>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3 class="h5 comparison-title">Would you like to try a different number of clusters and compare the results?</h3>
+                                            <p class="mb-3 text-muted">
+                                                Adjust the number of clusters below and run the same model again to compare performance.
+                                            </p>
+
+                                            <!-- Comparison Toggle -->
+                                            <div class="comparison-toggle mb-4">
+                                                <span>No/Yes</span>
+                                                <label class="switch ms-2">
+                                                    <input type="checkbox" id="comparisonToggle">
+                                                    <span class="slider"></span>
+                                                </label>
+                                            </div>
+
+                                            <!-- Comparison Form (hidden by default) -->
+                                            <div id="comparisonForm" style="display: none;">
+                                                <form method="post">
+                                                    <h4 class="mb-3">Set Number of Clusters</h4>
+                                                    <div class="mb-4">
+                                                        <label for="clusters" class="form-label mb-3 fw-bold">Cluster Count</label>
+                                                        <input type="number" id="new_clusters" class="form-control param-input" name="new_n_clusters"
+                                                               min="1" max="10" value="3" required>
+                                                    </div>
+
+                                                    <!-- Comparison Button -->
+                                                    <div class="d-flex justify-content-end mt-4">
+                                                        <button type="submit" formaction="/model/comparison_clustering"
+                                                                class="btn btn-success">
+                                                            <i class="fas fa-chart-bar me-2"></i>Run and Compare
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+
+<script>
+    // Simple validation for clusters input
+    document.getElementById('clusters').addEventListener('change', function() {
+        let value = parseInt(this.value);
+        if (value < 1) this.value = 1;
+        if (value > 10) this.value = 10;
+    });
+
+    // Toggle visibility of comparison form
+    document.getElementById('comparisonToggle').addEventListener('change', function() {
+        const form = document.getElementById('comparisonForm');
+        form.style.display = this.checked ? 'block' : 'none';
+    });
+</script>
+</body>
+</html>
+{% endblock %}
