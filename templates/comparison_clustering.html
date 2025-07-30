@@ -1,0 +1,949 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+        --success-gradient: linear-gradient(135deg, #36b9cc 0%, #2e9caf 100%);
+        --warning-gradient: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+        --danger-gradient: linear-gradient(135deg, #e74a3b 0%, #cc2e1f 100%);
+        --neutral-gradient: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-border: rgba(255, 255, 255, 0.2);
+        --shadow-light: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        --shadow-hover: 0 15px 40px 0 rgba(31, 38, 135, 0.25);
+    }
+
+    * {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+        background-color: #f5f7fb;
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .comparison-container {
+        padding: 2rem 0;
+        min-height: 100vh;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .hero-section {
+        text-align: center;
+        color: #2c3e50;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        font-weight: 300;
+        opacity: 0.7;
+        margin-bottom: 2rem;
+        color: #64748b;
+    }
+
+    /* Metrics Comparison - Blue containers */
+    .metrics-comparison-section {
+        background: var(--primary-gradient);
+        backdrop-filter: blur(15px);
+        border-radius: 25px;
+        padding: 3rem;
+        margin: 3rem 0;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .section-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 3rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .metric-comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .metric-comparison-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-comparison-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+
+    .metric-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .metric-values-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .metric-value-box {
+        flex: 1;
+        padding: 1rem;
+        margin: 0 0.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .previous-value {
+        background: linear-gradient(135deg, #e3e3e3 0%, #c7c7c7 100%);
+        color: #2c3e50;
+    }
+
+    .new-value {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .difference-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 2;
+    }
+
+    .improvement-arrow {
+        color: #36b9cc;
+    }
+
+    .decline-arrow {
+        color: #e74a3b;
+    }
+
+    .neutral-arrow {
+        color: #6f42c1;
+    }
+
+    /* Model Cards */
+    .model-comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .model-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .model-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .model-header {
+        padding: 2rem;
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+    .previous-model-header {
+        background: linear-gradient(135deg, #858796 0%, #6c757d 100%);
+    }
+
+    .new-model-header {
+        background: var(--primary-gradient);
+    }
+
+    .model-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .model-subtitle {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .model-body {
+        padding: 2rem;
+    }
+
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .config-item {
+        background: rgba(78, 115, 223, 0.1);
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid rgba(78, 115, 223, 0.2);
+    }
+
+    .config-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #4e73df;
+        margin-bottom: 0.5rem;
+    }
+
+    .config-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .visualization-container {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .visualization-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .img-container {
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .img-container img {
+        width: 100%;
+        height: auto;
+        display: block;
+        max-height: 280px;
+        object-fit: contain;
+    }
+
+    .cluster-distribution {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .cluster-distribution th {
+        background-color: #4e73df;
+        color: white;
+        text-align: left;
+        padding: 0.75rem;
+    }
+
+    .cluster-distribution td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .cluster-distribution tr:nth-child(even) {
+        background-color: #f8f9fc;
+    }
+
+    .cluster-distribution tr:hover {
+        background-color: #eaeef9;
+    }
+
+    .cluster-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        min-width: 80px;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .cluster-1 { background-color: #4e73df; color: white; }
+    .cluster-2 { background-color: #36b9cc; color: white; }
+    .cluster-3 { background-color: #1cc88a; color: white; }
+    .cluster-4 { background-color: #f6c23e; color: #1e293b; }
+    .cluster-5 { background-color: #e74a3b; color: white; }
+    .cluster-6 { background-color: #6f42c1; color: white; }
+    .cluster-7 { background-color: #fd7e14; color: white; }
+    .cluster-8 { background-color: #20c997; color: white; }
+    .cluster-9 { background-color: #6610f2; color: white; }
+    .cluster-10 { background-color: #6c757d; color: white; }
+
+    .progress-container {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+    }
+
+    /* Summary Section */
+    .summary-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 25px;
+        padding: 3rem;
+        margin: 3rem 0;
+        box-shadow: var(--shadow-light);
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .summary-metrics {
+        background: rgba(78, 115, 223, 0.05);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid rgba(78, 115, 223, 0.1);
+    }
+
+    .summary-metric-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .summary-metric-item:last-child {
+        border-bottom: none;
+    }
+
+    .summary-metric-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .summary-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .badge-improvement {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .badge-decline {
+        background: var(--danger-gradient);
+        color: white;
+    }
+
+    .badge-neutral {
+        background: var(--neutral-gradient);
+        color: white;
+    }
+
+    .recommendation-card {
+        background: rgba(54, 185, 204, 0.1);
+        border: 2px solid rgba(54, 185, 204, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .recommendation-card.warning {
+        background: rgba(231, 74, 59, 0.1);
+        border-color: rgba(231, 74, 59, 0.3);
+    }
+
+    .recommendation-card.neutral {
+        background: rgba(111, 66, 193, 0.1);
+        border-color: rgba(111, 66, 193, 0.3);
+    }
+
+    .recommendation-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .recommendation-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #1e293b;
+        margin-bottom: 2rem;
+    }
+
+    .action-button {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(78, 115, 223, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .metrics-comparison-section {
+            padding: 2rem 1rem;
+        }
+
+        .model-comparison-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .metric-values-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .difference-indicator {
+            position: static;
+            transform: none;
+            margin: 1rem 0;
+        }
+    }
+</style>
+
+<div class="comparison-container">
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section fade-in-up">
+            <h1 class="hero-title">Cluster Model Comparison</h1>
+            <p class="hero-subtitle">Pattern Identification Dashboard</p>
+        </div>
+
+        <!-- Metrics Comparison Section -->
+        <div class="metrics-comparison-section fade-in-up">
+            <h2 class="section-title">Cluster Metrics</h2>
+
+            <div class="metric-comparison-grid">
+                <!-- Cluster Count Comparison -->
+                <div class="metric-comparison-card">
+                    <div class="metric-name">Number of Clusters</div>
+                    <div class="metric-values-container">
+                        <div class="metric-value-box previous-value">
+                            <div class="metric-value">{{ previous_results.n_clusters }}</div>
+                            <div class="metric-label">Previous</div>
+                        </div>
+                        <div class="difference-indicator">
+                            {% set cluster_diff = results.n_clusters - previous_results.n_clusters %}
+                            {% if cluster_diff > 0 %}
+                                <span class="improvement-arrow">+{{ cluster_diff }}</span>
+                            {% elif cluster_diff < 0 %}
+                                <span class="decline-arrow">{{ cluster_diff }}</span>
+                            {% else %}
+                                <span class="neutral-arrow">→</span>
+                            {% endif %}
+                        </div>
+                        <div class="metric-value-box new-value">
+                            <div class="metric-value">{{ results.n_clusters }}</div>
+                            <div class="metric-label">New</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Average Cluster Size -->
+                <div class="metric-comparison-card">
+                    <div class="metric-name">Avg. Cluster Size</div>
+                    <div class="metric-values-container">
+                        {% set prev_avg = previous_results.cluster_counts.values() | sum / previous_results.n_clusters %}
+                        {% set new_avg = results.cluster_counts.values() | sum / results.n_clusters %}
+                        <div class="metric-value-box previous-value">
+                            <div class="metric-value">{{ prev_avg|round(1) }}</div>
+                            <div class="metric-label">Previous</div>
+                        </div>
+                        <div class="difference-indicator">
+                            {% set avg_diff = (new_avg - prev_avg)|round(1) %}
+                            {% if avg_diff > 0 %}
+                                <span class="improvement-arrow">+{{ avg_diff }}</span>
+                            {% elif avg_diff < 0 %}
+                                <span class="decline-arrow">{{ avg_diff }}</span>
+                            {% else %}
+                                <span class="neutral-arrow">→</span>
+                            {% endif %}
+                        </div>
+                        <div class="metric-value-box new-value">
+                            <div class="metric-value">{{ new_avg|round(1) }}</div>
+                            <div class="metric-label">New</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cluster Balance -->
+                <div class="metric-comparison-card">
+                    <div class="metric-name">Cluster Balance</div>
+                    <div class="metric-values-container">
+                        {% set prev_counts = previous_results.cluster_counts.values() %}
+                        {% set prev_min = prev_counts|min %}
+                        {% set prev_max = prev_counts|max %}
+                        {% set prev_balance = (prev_min / prev_max * 100)|round(1) %}
+                        
+                        {% set new_counts = results.cluster_counts.values() %}
+                        {% set new_min = new_counts|min %}
+                        {% set new_max = new_counts|max %}
+                        {% set new_balance = (new_min / new_max * 100)|round(1) %}
+                        
+                        <div class="metric-value-box previous-value">
+                            <div class="metric-value">{{ prev_balance }}%</div>
+                            <div class="metric-label">Previous</div>
+                        </div>
+                        <div class="difference-indicator">
+                            {% set balance_diff = (new_balance - prev_balance)|round(1) %}
+                            {% if balance_diff > 0 %}
+                                <span class="improvement-arrow">+{{ balance_diff }}%</span>
+                            {% elif balance_diff < 0 %}
+                                <span class="decline-arrow">{{ balance_diff }}%</span>
+                            {% else %}
+                                <span class="neutral-arrow">→</span>
+                            {% endif %}
+                        </div>
+                        <div class="metric-value-box new-value">
+                            <div class="metric-value">{{ new_balance }}%</div>
+                            <div class="metric-label">New</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Comparison Section -->
+        <div class="model-comparison-grid fade-in-up">
+            <!-- Previous Model -->
+            <div class="model-card">
+                <div class="model-header previous-model-header">
+                    <div class="model-title">Previous Clustering</div>
+                    <div class="model-subtitle">
+                        K-Means with {{ previous_results.n_clusters }} clusters
+                    </div>
+                </div>
+                <div class="model-body">
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <div class="config-value">{{ previous_results.n_clusters }}</div>
+                            <div class="config-label">Clusters</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-value">{{ previous_results.selected_columns|length }}</div>
+                            <div class="config-label">Features</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-value">{{ previous_results.cluster_counts.values() | sum }}</div>
+                            <div class="config-label">Points</div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Correlation Matrix</div>
+                        <div class="img-container">
+                            <img src="{{ url_for('static', filename=previous_results.corr_plot) }}" alt="Previous Correlation Matrix">
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Cluster Visualization</div>
+                        <div class="img-container">
+                            <img src="{{ url_for('static', filename=previous_results.cluster_plot) }}" alt="Previous Cluster Visualization">
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Cluster Distribution</div>
+                        <table class="cluster-distribution">
+                            <thead>
+                                <tr>
+                                    <th>Cluster</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                    <th>Distribution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cluster, count in previous_results.cluster_counts.items() %}
+                                {% set percentage = (count / (previous_results.cluster_counts.values() | sum) * 100) %}
+                                <tr>
+                                    <td>
+                                        <span class="cluster-badge cluster-{{ loop.index }}">Cluster {{ cluster }}</span>
+                                    </td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ percentage|round(1) }}%</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar" style="width: {{ percentage }}%; background-color: {{ ['#4e73df', '#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b', '#6f42c1', '#fd7e14', '#20c997', '#6610f2', '#6c757d'][loop.index0 % 10] }};"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Model -->
+            <div class="model-card new-model">
+                <div class="model-header new-model-header">
+                    <div class="model-title">New Clustering</div>
+                    <div class="model-subtitle">
+                        K-Means with {{ results.n_clusters }} clusters
+                    </div>
+                </div>
+                <div class="model-body">
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <div class="config-value">{{ results.n_clusters }}</div>
+                            <div class="config-label">Clusters</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-value">{{ results.selected_columns|length }}</div>
+                            <div class="config-label">Features</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-value">{{ results.cluster_counts.values() | sum }}</div>
+                            <div class="config-label">Points</div>
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Correlation Matrix</div>
+                        <div class="img-container">
+                            <img src="{{ url_for('static', filename=results.corr_plot) }}" alt="New Correlation Matrix">
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Cluster Visualization</div>
+                        <div class="img-container">
+                            <img src="{{ url_for('static', filename=results.cluster_plot) }}" alt="New Cluster Visualization">
+                        </div>
+                    </div>
+
+                    <div class="visualization-container">
+                        <div class="visualization-title">Cluster Distribution</div>
+                        <table class="cluster-distribution">
+                            <thead>
+                                <tr>
+                                    <th>Cluster</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                    <th>Distribution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cluster, count in results.cluster_counts.items() %}
+                                {% set percentage = (count / (results.cluster_counts.values() | sum) * 100) %}
+                                <tr>
+                                    <td>
+                                        <span class="cluster-badge cluster-{{ loop.index }}">Cluster {{ cluster }}</span>
+                                    </td>
+                                    <td>{{ count }}</td>
+                                    <td>{{ percentage|round(1) }}%</td>
+                                    <td>
+                                        <div class="progress-container">
+                                            <div class="progress-bar" style="width: {{ percentage }}%; background-color: {{ ['#4e73df', '#36b9cc', '#1cc88a', '#f6c23e', '#e74a3b', '#6f42c1', '#fd7e14', '#20c997', '#6610f2', '#6c757d'][loop.index0 % 10] }};"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="summary-section fade-in-up">
+            <h2 class="section-title" style="color: #1e293b;">Clustering Summary</h2>
+
+            <div class="summary-grid">
+                <div class="summary-metrics">
+                    <h3 style="margin-bottom: 2rem; color: #1e293b;">Cluster Analysis</h3>
+
+                    <div class="summary-metric-item">
+                        <span class="summary-metric-name">Cluster Count</span>
+                        {% set cluster_diff = results.n_clusters - previous_results.n_clusters %}
+                        <span class="summary-badge
+                            {% if cluster_diff == 0 %}badge-neutral
+                            {% else %}badge-improvement
+                            {% endif %}">
+                            {{ cluster_diff }}
+                        </span>
+                    </div>
+
+                    <div class="summary-metric-item">
+                        <span class="summary-metric-name">Cluster Balance</span>
+                        {% set prev_balance = (prev_min / prev_max * 100)|round(1) %}
+                        {% set new_balance = (new_min / new_max * 100)|round(1) %}
+                        {% set balance_diff = (new_balance - prev_balance)|round(1) %}
+                        <span class="summary-badge
+                            {% if balance_diff > 0 %}badge-improvement
+                            {% elif balance_diff < 0 %}badge-decline
+                            {% else %}badge-neutral
+                            {% endif %}">
+                            {{ balance_diff }}%
+                        </span>
+                    </div>
+
+                    <div class="summary-metric-item">
+                        <span class="summary-metric-name">Data Points</span>
+                        <span class="summary-badge badge-neutral">
+                            {{ results.cluster_counts.values() | sum }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="recommendation-card
+                    {% if results.n_clusters == previous_results.n_clusters and balance_diff > 5 %}
+                    {% elif results.n_clusters > previous_results.n_clusters and balance_diff > 0 %} 
+                    {% elif results.n_clusters < previous_results.n_clusters and balance_diff < 0 %} warning
+                    {% else %} neutral
+                    {% endif %}">
+
+                    <div class="recommendation-icon">
+                        {% if results.n_clusters == previous_results.n_clusters and balance_diff > 5 %}
+                            ✅
+                        {% elif results.n_clusters > previous_results.n_clusters and balance_diff > 0 %}
+                            📈
+                        {% elif results.n_clusters < previous_results.n_clusters and balance_diff < 0 %}
+                            ⚠️
+                        {% else %}
+                            ⚖️
+                        {% endif %}
+                    </div>
+
+                    <div class="recommendation-text">
+                        {% if results.n_clusters == previous_results.n_clusters and balance_diff > 5 %}
+                            Excellent! The new clustering configuration shows better balance while maintaining the same number of clusters.
+                        {% elif results.n_clusters > previous_results.n_clusters and balance_diff > 0 %}
+                            The increased number of clusters provides better granularity while maintaining good balance. Consider adopting this configuration.
+                        {% elif results.n_clusters < previous_results.n_clusters and balance_diff < 0 %}
+                            Reducing cluster count has negatively impacted balance. Consider refining parameters or reverting to previous configuration.
+                        {% else %}
+                            Both configurations have similar characteristics. Consider factors like interpretability and business requirements.
+                        {% endif %}
+                    </div>
+
+                    <a href="{{ url_for('clustering_configure') }}" class="action-button">
+                        <span>←</span> Back to Configuration
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add staggered animation delays
+        const cards = document.querySelectorAll('.fade-in-up');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Highlight significant differences
+        const differenceIndicators = document.querySelectorAll('.difference-indicator');
+        differenceIndicators.forEach(indicator => {
+            const text = indicator.textContent.trim();
+            const value = parseFloat(text.replace(/[^\d.-]/g, ''));
+
+            if (Math.abs(value) > 0.05) {
+                indicator.style.transform = 'translate(-50%, -50%) scale(1.1)';
+                indicator.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+            }
+        });
+
+        // Add hover effects for metric cards
+        const metricCards = document.querySelectorAll('.metric-comparison-card');
+        metricCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 15px 40px rgba(31, 38, 135, 0.5)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 8px 32px rgba(31, 38, 135, 0.37)';
+            });
+        });
+
+        // Add smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation for images
+        const images = document.querySelectorAll('.img-container img');
+        images.forEach(img => {
+            img.addEventListener('load', function() {
+                this.style.opacity = '0';
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transition = 'all 0.3s ease';
+                    this.style.opacity = '1';
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+
+        // Add tooltip functionality for metric values
+        const metricValues = document.querySelectorAll('.metric-value');
+        metricValues.forEach(value => {
+            value.addEventListener('mouseenter', function() {
+                const valueText = this.textContent.trim();
+                this.setAttribute('title', `Value: ${valueText}`);
+            });
+        });
+
+        // Add pulse animation for significant improvements
+        const improvementArrows = document.querySelectorAll('.improvement-arrow');
+        improvementArrows.forEach(arrow => {
+            const value = parseFloat(arrow.textContent.replace(/[^\d.-]/g, ''));
+            if (value > 0.1) {
+                arrow.style.animation = 'pulse 2s infinite';
+            }
+        });
+
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+
+{% endblock %}

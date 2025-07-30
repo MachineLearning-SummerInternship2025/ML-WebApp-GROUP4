@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .documentation-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .card-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .upload-card, .result-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+    }
+
+    .step-card {
+        background: #f8f9fc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #4e73df;
+    }
+
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: #4e73df;
+        color: white;
+        border-radius: 50%;
+        font-weight: bold;
+        margin-right: 12px;
+    }
+
+    .upload-area {
+        border: 2px dashed #d1d3e2;
+        border-radius: 8px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin: 1.5rem 0;
+        background: #f8f9fc;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upload-area:hover {
+        border-color: #4e73df;
+        background: #edf2ff;
+    }
+
+    .upload-area i {
+        font-size: 3rem;
+        color: #4e73df;
+        margin-bottom: 1rem;
+    }
+
+    .preview-container {
+        max-height: 400px;
+        overflow: auto;
+        margin: 1.5rem 0;
+        border: 1px solid #e3e6f0;
+        border-radius: 8px;
+    }
+
+    .preview-table {
+        font-size: 0.85rem;
+        margin-bottom: 0;
+    }
+
+    .preview-table th {
+        background-color: #4e73df;
+        color: white;
+        position: sticky;
+        top: 0;
+    }
+
+    .download-btn {
+        background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .download-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4);
+        color: white;
+    }
+
+    .download-btn i {
+        margin-right: 8px;
+    }
+
+    .sample-section {
+        background: #f8f9fc;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .sample-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .sample-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .bad-example {
+        border-left: 4px solid #e74a3b;
+    }
+
+    .good-example {
+        border-left: 4px solid #1cc88a;
+    }
+</style>
+
+<div class="documentation-container">
+    <div class="header-section">
+        <h1><i class="bi bi-file-earmark-spreadsheet me-3"></i>CSV Cleaning Tool</h1>
+        <p class="lead">Fix messy CSV files with inconsistent formatting, delimiters, and column organization</p>
+    </div>
+
+    <div class="card-section">
+        <div class="upload-card">
+            <h3 class="mb-4"><i class="bi bi-cloud-arrow-up me-2"></i>Upload Your CSV File</h3>
+
+            <div class="step-card">
+                <div>
+                    <span class="step-number">1</span>
+                    <span>Upload your CSV file</span>
+                </div>
+                <p class="mt-2 mb-0">Select a CSV file with formatting issues from your computer</p>
+            </div>
+
+            <div id="uploadArea" class="upload-area">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+                <h5>Drag & Drop your CSV file here</h5>
+                <p class="text-muted">or click to browse files</p>
+                <input type="file" id="fileInput" accept=".csv" style="display: none;">
+            </div>
+
+            <div class="step-card">
+                <div>
+                    <span class="step-number">2</span>
+                    <span>Preview your data</span>
+                </div>
+                <p class="mt-2 mb-0">Review how your data will be cleaned and organized</p>
+            </div>
+
+            <div class="preview-container">
+                <table class="table preview-table">
+                    <thead id="previewHeader"></thead>
+                    <tbody id="previewBody"></tbody>
+                </table>
+            </div>
+
+            <div class="step-card">
+                <div>
+                    <span class="step-number">3</span>
+                    <span>Download cleaned file</span>
+                </div>
+                <p class="mt-2 mb-0">Get your properly formatted CSV ready for analysis</p>
+            </div>
+
+            <div id="resultSection" class="text-center" style="display: none;">
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span id="successMessage">Your file has been cleaned successfully!</span>
+                </div>
+                <button id="downloadBtn" class="download-btn">
+                    <i class="bi bi-download me-2"></i>Download Cleaned CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="result-card">
+            <h3 class="mb-4"><i class="bi bi-lightbulb me-2"></i>How It Works</h3>
+            <p>This tool automatically fixes common CSV formatting issues:</p>
+
+            <div class="step-card">
+                <h5><i class="bi bi-columns me-2"></i>Column Detection</h5>
+                <p>Identifies and separates merged columns using smart delimiter detection</p>
+            </div>
+
+            <div class="step-card">
+                <h5><i class="bi bi-layout-text-sidebar me-2"></i>Row Normalization</h5>
+                <p>Ensures all rows have consistent columns with proper padding</p>
+            </div>
+
+            <div class="step-card">
+                <h5><i class="bi bi-braces me-2"></i>Encoding Handling</h5>
+                <p>Fixes character encoding issues and special characters</p>
+            </div>
+
+            <div class="step-card">
+                <h5><i class="bi bi-x-circle me-2"></i>Whitespace Cleaning</h5>
+                <p>Removes extra spaces and formatting inconsistencies</p>
+            </div>
+
+            <div class="sample-section">
+                <h4><i class="bi bi-file-earmark-medical me-2"></i>Examples</h4>
+                <p>See how we transform messy data into clean, usable formats</p>
+
+                <div class="sample-cards">
+                    <div class="sample-card bad-example">
+                        <h6><i class="bi bi-exclamation-triangle me-2"></i>Messy Input</h6>
+                        <code>
+                            Name Age City<br>
+                            John 25 New York<br>
+                            Sarah|30|Los Angeles<br>
+                            Mike - 40 - Chicago<br>
+                        </code>
+                    </div>
+
+                    <div class="sample-card good-example">
+                        <h6><i class="bi bi-check-circle me-2"></i>Cleaned Output</h6>
+                        <code>
+                            Name,Age,City<br>
+                            John,25,New York<br>
+                            Sarah,30,Los Angeles<br>
+                            Mike,40,Chicago<br>
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewHeader = document.getElementById('previewHeader');
+        const previewBody = document.getElementById('previewBody');
+        const resultSection = document.getElementById('resultSection');
+        const successMessage = document.getElementById('successMessage');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        let cleanedFilename = '';
+
+        // Handle file selection
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+
+                // Show filename in upload area
+                uploadArea.innerHTML = `
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    <h5>${file.name}</h5>
+                    <p class="text-muted">Click to change file</p>
+                `;
+
+                // Send file to server for cleaning
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/clean-csv', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    // Show success message and download button
+                    successMessage.textContent = data.message;
+                    downloadBtn.onclick = () => window.location.href = data.download_link;
+                    resultSection.style.display = 'block';
+                    cleanedFilename = data.filename;
+
+                    // Fetch cleaned file to show preview
+                    fetch(data.download_link)
+                        .then(response => response.text())
+                        .then(csvData => {
+                            // Parse CSV and show preview
+                            const rows = csvData.split('\n');
+                            const header = rows[0].split(',');
+                            const body = rows.slice(1, 6); // First 5 data rows
+
+                            // Create header row
+                            let headerHtml = '<tr>';
+                            header.forEach(col => {
+                                headerHtml += `<th>${col}</th>`;
+                            });
+                            headerHtml += '</tr>';
+                            previewHeader.innerHTML = headerHtml;
+
+                            // Create body rows
+                            let bodyHtml = '';
+                            body.forEach(row => {
+                                const cols = row.split(',');
+                                bodyHtml += '<tr>';
+                                cols.forEach(col => {
+                                    bodyHtml += `<td>${col}</td>`;
+                                });
+                                bodyHtml += '</tr>';
+                            });
+                            previewBody.innerHTML = bodyHtml;
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your file');
+                });
+            }
+        });
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4e73df';
+            uploadArea.style.backgroundColor = '#edf2ff';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#d1d3e2';
+            uploadArea.style.backgroundColor = '#f8f9fc';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#d1d3e2';
+            uploadArea.style.backgroundColor = '#f8f9fc';
+
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        });
+    });
+</script>
+{% endblock %}
